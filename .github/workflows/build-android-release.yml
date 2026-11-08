@@ -64,7 +64,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: "21"
 
       - name: Install Ant
         if: steps.existing.outputs.exists == 'false'
@@ -117,7 +117,7 @@ jobs:
           echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
           LWJGL_BUILD_OFFLINE=true
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
-          ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
+          ant -Dplatform=android -Dbinding.remotery=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
               compile-templates compile-native
 

@@ -100,13 +100,16 @@ jobs:
       - name: Install Android configuration
         if: steps.existing.outputs.exists == 'false'
         run: |
-          mkdir -p lwjgl/config/android
+          mkdir -p lwjgl/config/android/arm64
 
           cp config-source/.github/android/build.xml \
             lwjgl/config/android/build.xml
 
           cp config-source/.github/android/version.script \
             lwjgl/config/android/version.script
+          
+          cp config-source/.github/android/arm64/libffi.a \
+            lwjgl/config/android/arm64/libffi.a
 
       - name: Verify Android NDK
         run: |
@@ -124,6 +127,7 @@ jobs:
         run: |
           echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
+          cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/arm64/org/lwjgl/
           LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
               compile-templates compile-native

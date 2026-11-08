@@ -129,7 +129,7 @@ jobs:
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
-          ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
+          ant -Dplatform=android -Dbinding.remotery=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
               init
           LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false \

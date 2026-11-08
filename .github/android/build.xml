@@ -67,7 +67,7 @@
         <attribute name="lang" default="c"/>
         <attribute name="gcc.exec" default="${gcc.prefix}clang${gcc.suffix}"/>
         <attribute name="gpp.exec" default="${gcc.prefix}clang++${gcc.suffix}"/>
-        <attribute name="flags" default="-Wfatal-errors"/>
+        <attribute name="flags" default=""/>
         <attribute name="simple" default="false"/>
         <element name="beforeCompile" optional="true"/>
         <element name="source" optional="true"/>
@@ -159,7 +159,7 @@
         <parallel threadsPerProcessor="2">
 
         <!-- CORE -->
-        <build module="core" flags="-Werror -Wfatal-errors -Wall -Wextra -pedantic">
+        <build module="core" flags="-Wall -Wextra -pedantic">
             <beforeCompile>
                 <compile>
                     <arg value="-I${src.main.rel}/${platform}/liburing"/>

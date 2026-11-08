@@ -57,7 +57,14 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
+
+      - name: Set up Java 8
+        if: steps.existing.outputs.exists == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "1.8"
 
       - name: Install Ant
         if: steps.existing.outputs.exists == 'false'
@@ -108,14 +115,11 @@ jobs:
           LWJGL_BUILD_ARCH: arm64
         run: |
           echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
+          LWJGL_BUILD_OFFLINE=true
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
-          ant -f config/android/build.xml \
-            -Dplatform=android \
-            -Dandroid.triplet=aarch64-linux-android26 \
-            -Dgcc.prefix=aarch64-linux-android26- \
-            -Dbinding.nfd=false \
-            compile-native-platform
-
+          ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
+              compile-templates compile-native
 
       - name: Create GitHub Release
         if: steps.existing.outputs.exists == 'false'

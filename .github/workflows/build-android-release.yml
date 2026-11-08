@@ -130,10 +130,10 @@ jobs:
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           ant -Dplatform=android -Dbinding.remotery=false \
-              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               init
           LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false \
-              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
 
       - name: Build Android native libraries JRE 25
@@ -148,10 +148,10 @@ jobs:
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
-              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               init
           LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
-              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
 
       - name: Create GitHub Release

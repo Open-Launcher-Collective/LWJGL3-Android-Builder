@@ -77,7 +77,7 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ant mkdirs
+          sudo apt-get install -y ant
 
       - name: Install Android SDK and NDK
         if: steps.existing.outputs.exists == 'false'
@@ -138,7 +138,7 @@ jobs:
           echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
           LWJGL_BUILD_OFFLINE=true
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
-          mkdirs bin/libs/native/android/arm64/org/lwjgl
+          mkdir -p bin/libs/native/android/arm64/org/lwjgl
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/arm64/org/lwjgl/
           ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \

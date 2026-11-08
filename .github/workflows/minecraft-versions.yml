@@ -1,0 +1,124 @@
+
+name: Minecraft LWJGL Versions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    name: Discover Minecraft LWJGL Versions
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.scan.outputs.matrix }}
+
+    steps:
+      - name: Discover Minecraft dependencies
+        id: scan
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import urllib.request
+          import subprocess
+          import os
+          from concurrent.futures import ThreadPoolExecutor
+
+          def get_json(url):
+              req = urllib.request.Request(
+                  url,
+                  headers={"User-Agent": "LWJGL-Android-CI"}
+              )
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  return json.load(r)
+
+          # Obtain all official LWJGL Git tags.
+          output = subprocess.check_output([
+              "git", "ls-remote", "--tags", "--refs",
+              "https://github.com/LWJGL/lwjgl3.git"
+          ], text=True)
+
+          tags = {}
+
+          for line in output.splitlines():
+              ref = line.split()[-1]
+              name = ref.removeprefix("refs/tags/")
+              normalized = name.removeprefix("v")
+              tags[normalized] = name
+
+          # Obtain every Minecraft version.
+          manifest = get_json(
+              "https://piston-meta.mojang.com/mc/game/"
+              "version_manifest_v2.json"
+          )
+
+          def inspect(entry):
+              try:
+                  data = get_json(entry["url"])
+                  found = set()
+
+                  for library in data.get("libraries", []):
+                      parts = library.get("name", "").split(":")
+
+                      if (
+                          len(parts) >= 3
+                          and parts[0] == "org.lwjgl"
+                      ):
+                          found.add(parts[2])
+
+                  return found
+
+              except Exception as e:
+                  print(f"WARNING: {entry['id']}: {e}")
+                  return set()
+
+          versions = set()
+
+          with ThreadPoolExecutor(max_workers=12) as pool:
+              for result in pool.map(
+                  inspect, manifest["versions"]
+              ):
+                  versions.update(result)
+
+          matrix = []
+
+          for version in sorted(versions):
+              ref = tags.get(version)
+
+              if ref:
+                  matrix.append({
+                      "version": version,
+                      "ref": ref
+                  })
+              else:
+                  print(
+                      f"WARNING: No upstream Git tag for "
+                      f"Minecraft LWJGL version {version}"
+                  )
+
+          result = {"include": matrix}
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(
+                  "matrix=" + json.dumps(result) + "\n"
+              )
+
+          print(json.dumps(result, indent=2))
+          PY
+
+  build:
+    name: Build Minecraft LWJGL ${{ matrix.version }}
+    needs: discover
+    if: needs.discover.outputs.matrix != '{"include":[]}'
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
+
+    uses: ./.github/workflows/build-android-release.yml
+    with:
+      version: ${{ matrix.version }}
+      upstream_ref: ${{ matrix.ref }}

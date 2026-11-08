@@ -1,0 +1,84 @@
+
+name: New LWJGL Tags
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+  # Allow manual testing too.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    name: Discover LWJGL Tags
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.tags.outputs.matrix }}
+
+    steps:
+      - name: Get official LWJGL tags
+        id: tags
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          import json
+          import os
+          import re
+
+          output = subprocess.check_output([
+              "git", "ls-remote", "--tags", "--refs",
+              "https://github.com/LWJGL/lwjgl3.git"
+          ], text=True)
+
+          pattern = re.compile(
+              r"^v?(\d+\.\d+\.\d+)$"
+          )
+
+          versions = []
+
+          for line in output.splitlines():
+              ref = line.split()[-1]
+              tag = ref.removeprefix("refs/tags/")
+
+              match = pattern.match(tag)
+
+              if match:
+                  versions.append({
+                      "version": match.group(1),
+                      "ref": tag
+                  })
+
+          versions.sort(
+              key=lambda x: tuple(
+                  int(n) for n in x["version"].split(".")
+              )
+          )
+
+          result = {"include": versions}
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(
+                  "matrix=" + json.dumps(result) + "\n"
+              )
+
+          print(json.dumps(result, indent=2))
+          PY
+
+  build:
+    name: Build LWJGL ${{ matrix.version }}
+    needs: discover
+    if: needs.discover.outputs.matrix != '{"include":[]}'
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
+
+    uses: ./.github/workflows/build-android-release.yml
+    with:
+      version: ${{ matrix.version }}
+      upstream_ref: ${{ matrix.ref }}

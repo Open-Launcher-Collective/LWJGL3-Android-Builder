@@ -1,0 +1,123 @@
+
+name: Build Android Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: LWJGL version
+        required: true
+        type: string
+      upstream_ref:
+        description: Exact upstream LWJGL Git ref
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: LWJGL ${{ inputs.version }} ARM64
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+        with:
+          path: config-source
+
+      - name: Check whether release already exists
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          TAG="android-lwjgl-${VERSION}"
+
+          if gh release view "$TAG" \
+            --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release already exists: $TAG"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout LWJGL
+        if: steps.existing.outputs.exists == 'false'
+        uses: actions/checkout@v4
+        with:
+          repository: LWJGL/lwjgl3
+          ref: ${{ inputs.upstream_ref }}
+          path: lwjgl
+          fetch-depth: 1
+
+      - name: Set up Java
+        if: steps.existing.outputs.exists == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install Ant
+        if: steps.existing.outputs.exists == 'false'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant
+
+      - name: Install Android SDK and NDK
+        if: steps.existing.outputs.exists == 'false'
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK
+        if: steps.existing.outputs.exists == 'false'
+        run: |
+          sdkmanager "ndk;27.2.12479018"
+
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/27.2.12479018" \
+            >> "$GITHUB_ENV"
+
+          echo "ANDROID_SDK_HOME=$ANDROID_SDK_ROOT" \
+            >> "$GITHUB_ENV"
+
+          ln -sfn "$ANDROID_SDK_ROOT/ndk/27.2.12479018" \
+            "$ANDROID_SDK_ROOT/ndk-bundle"
+
+      - name: Install Android configuration
+        if: steps.existing.outputs.exists == 'false'
+        run: |
+          mkdir -p lwjgl/config/android
+
+          cp config-source/.github/android/build.xml \
+            lwjgl/config/android/build.xml
+
+          cp config-source/.github/android/version.script \
+            lwjgl/config/android/version.script
+
+      - name: Build ARM64 Android AAR
+        if: steps.existing.outputs.exists == 'false'
+        working-directory: lwjgl
+        env:
+          LWJGL_BUILD_ARCH: arm64
+        run: |
+          ant compile-templates
+          ant aar
+
+          test -f bin/android/lwjgl.aar
+
+      - name: Create GitHub Release
+        if: steps.existing.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-lwjgl-${{ inputs.version }}
+          name: LWJGL ${{ inputs.version }} - Android ARM64
+          target_commitish: ${{ github.sha }}
+          body: |
+            Android ARM64 build of LWJGL ${{ inputs.version }}.
+
+            Upstream repository: https://github.com/LWJGL/lwjgl3
+            Upstream ref: ${{ inputs.upstream_ref }}
+
+            Built automatically using GitHub Actions.
+          files: lwjgl/bin/android/lwjgl.aar
+          fail_on_unmatched_files: true

@@ -52,8 +52,8 @@ jobs:
           path: lwjgl
           fetch-depth: 1
 
-      - name: Set up Java
-        if: steps.existing.outputs.exists == 'false'
+      - name: Set up Java 21
+        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.4.1'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -86,13 +86,22 @@ jobs:
       - name: Install Android configuration
         if: steps.existing.outputs.exists == 'false'
         run: |
-          mkdir -p lwjgl/config/android
+          mkdir -p lwjgl/config/android/arm64
 
           cp config-source/.github/android/build.xml \
             lwjgl/config/android/build.xml
 
           cp config-source/.github/android/version.script \
             lwjgl/config/android/version.script
+          
+          cp config-source/.github/android/arm64/libffi.a \
+            lwjgl/config/android/arm64/libffi.a
+
+      - name: Install liburing patch
+        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.1'
+        run: |
+          cp config-source/.github/android/compat.h \
+            lwjgl/modules/lwjgl/core/src/main/c/linux/liburing/include/liburing/compat.h
 
       - name: Verify Android NDK
         run: |
@@ -102,20 +111,53 @@ jobs:
 
           echo "$NDK_BIN" >> "$GITHUB_PATH"
 
+      - name: Set up Java 8
+        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.4.1'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
+
       - name: Build Android native libraries
+        if: inputs.version < '3.4.1'
+        working-directory: lwjgl
+        env:
+          LWJGL_BUILD_ARCH: arm64
+        run: |
+          test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
+          mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          ant -Dplatform=android -Dbinding.remotery=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
+              init
+          LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
+              compile-templates compile-native
+
+      - name: Set up Java 25
+        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.4.1'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Build Android native libraries JRE 25
+        if: inputs.version >= '3.4.1'
         working-directory: lwjgl
         env:
           LWJGL_BUILD_ARCH: arm64
         run: |
           echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
-          ant -f config/android/build.xml \
-            -Dplatform=android \
-            -Dandroid.triplet=aarch64-linux-android26 \
-            -Dgcc.prefix=aarch64-linux-android26- \
-            -Dbinding.nfd=false \
-            compile-native-platform
-
+          mkdir -p bin/libs/native/android/arm64/org/lwjgl
+          mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
+              init
+          LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
+              compile-templates compile-native
 
       - name: Create GitHub Release
         if: steps.existing.outputs.exists == 'false'

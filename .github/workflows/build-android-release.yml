@@ -59,18 +59,25 @@ jobs:
           distribution: temurin
           java-version: "8"
 
-      - name: Set up Java
-        if: steps.existing.outputs.exists == 'false'
+      - name: Set up Java 21
+        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.4.1'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
 
+      - name: Set up Java 25
+        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.4.1'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
       - name: Install Ant
         if: steps.existing.outputs.exists == 'false'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ant
+          sudo apt-get install -y ant mkdirs
 
       - name: Install Android SDK and NDK
         if: steps.existing.outputs.exists == 'false'
@@ -110,6 +117,7 @@ jobs:
           echo "$NDK_BIN" >> "$GITHUB_PATH"
 
       - name: Build Android native libraries
+        if: inputs.version < '3.4.1'
         working-directory: lwjgl
         env:
           LWJGL_BUILD_ARCH: arm64
@@ -118,6 +126,21 @@ jobs:
           LWJGL_BUILD_OFFLINE=true
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           ant -Dplatform=android -Dbinding.remotery=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
+              compile-templates compile-native
+
+      - name: Build Android native libraries JRE 25
+        if: inputs.version >= '3.4.1'
+        working-directory: lwjgl
+        env:
+          LWJGL_BUILD_ARCH: arm64
+        run: |
+          echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
+          LWJGL_BUILD_OFFLINE=true
+          test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
+          mkdirs bin/libs/native/android/arm64/org/lwjgl
+          cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/arm64/org/lwjgl/
+          ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.jawt=false \
               compile-templates compile-native
 

@@ -52,19 +52,19 @@ jobs:
           path: lwjgl
           fetch-depth: 1
 
-      - name: Set up Java
-        if: steps.existing.outputs.exists == 'false'
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "25"
-
       - name: Set up Java 8
         if: steps.existing.outputs.exists == 'false'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "8"
+
+      - name: Set up Java
+        if: steps.existing.outputs.exists == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
 
       - name: Install Ant
         if: steps.existing.outputs.exists == 'false'

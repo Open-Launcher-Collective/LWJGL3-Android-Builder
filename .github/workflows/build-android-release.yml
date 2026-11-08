@@ -67,7 +67,7 @@ jobs:
 
       - name: Install Android SDK and NDK
         if: steps.existing.outputs.exists == 'false'
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install NDK
         if: steps.existing.outputs.exists == 'false'
@@ -94,16 +94,28 @@ jobs:
           cp config-source/.github/android/version.script \
             lwjgl/config/android/version.script
 
-      - name: Build ARM64 Android AAR
-        if: steps.existing.outputs.exists == 'false'
+      - name: Verify Android NDK
+        run: |
+          NDK_BIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+
+          ls -l "$NDK_BIN/aarch64-linux-android26-clang++"
+
+          echo "$NDK_BIN" >> "$GITHUB_PATH"
+
+      - name: Build Android native libraries
         working-directory: lwjgl
         env:
           LWJGL_BUILD_ARCH: arm64
         run: |
-          ant compile-templates
-          ant aar
+          echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
+          test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
+          ant -f config/android/build.xml \
+            -Dplatform=android \
+            -Dandroid.triplet=aarch64-linux-android26 \
+            -Dgcc.prefix=aarch64-linux-android26- \
+            -Dbinding.nfd=false \
+            compile-native-platform
 
-          test -f bin/android/lwjgl.aar
 
       - name: Create GitHub Release
         if: steps.existing.outputs.exists == 'false'

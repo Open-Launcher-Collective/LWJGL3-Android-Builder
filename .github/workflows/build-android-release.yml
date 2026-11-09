@@ -52,12 +52,12 @@ jobs:
           path: lwjgl
           fetch-depth: 1
 
-      - name: Set up Java 8
-        if: steps.existing.outputs.exists == 'false'
+      - name: Set up Java 21
+        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.4.1'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "8"
+          java-version: "21"
 
       - name: Set up Java 25
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.4.1'
@@ -114,6 +114,13 @@ jobs:
           ls -l "$NDK_BIN/aarch64-linux-android26-clang++"
 
           echo "$NDK_BIN" >> "$GITHUB_PATH"
+
+      - name: Set up Java 8
+        if: steps.existing.outputs.exists == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "8"
 
       - name: Build Android native libraries
         if: inputs.version < '3.4.1'

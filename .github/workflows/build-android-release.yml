@@ -103,7 +103,10 @@ jobs:
           
           cp config-source/.github/android/arm64/libffi.a \
             lwjgl/config/android/arm64/libffi.a
-          
+
+      - name: Install liburing patch
+        if: steps.existing.outputs.exists == 'false' && inputs.version > '3.3.1'
+        run: |
           cp config-source/.github/android/compat.h \
             lwjgl/modules/lwjgl/core/src/main/c/linux/liburing/include/liburing/compat.h
 

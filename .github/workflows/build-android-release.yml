@@ -76,11 +76,11 @@ jobs:
           
           echo "$REPO_IP central.maven.org" | sudo tee -a /etc/hosts
 
-      - name: Install Android SDK and NDK
+      - name: Install Android SDK
         if: steps.existing.outputs.exists == 'false'
         uses: android-actions/setup-android@v4
 
-      - name: Install NDK
+      - name: Install Android NDK
         if: steps.existing.outputs.exists == 'false'
         run: |
           sdkmanager "ndk;27.2.12479018"

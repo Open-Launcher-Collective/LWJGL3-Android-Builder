@@ -63,7 +63,7 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ant dnsutils libx11-dev
+          sudo apt-get install -y ant dnsutils libx11-dev xorgproto
 
       - name: Redirect legacy Maven URL
         if: steps.existing.outputs.exists == 'false' && inputs.version <= '3.2.1'
@@ -139,6 +139,7 @@ jobs:
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp -r /usr/include/X11 $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
           ant -Dplatform=android -Dbinding.remotery=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               init
@@ -164,6 +165,7 @@ jobs:
           mkdir -p bin/libs/native/android/arm64/org/lwjgl
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp -r /usr/include/X11 $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
           ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               init

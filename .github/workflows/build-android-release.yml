@@ -63,7 +63,7 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ant dnsutils libx11-dev xorgproto
+          sudo apt-get install -y ant dnsutils libx11-dev
 
       - name: Redirect legacy Maven URL
         if: steps.existing.outputs.exists == 'false' && inputs.version <= '3.2.1'

@@ -63,7 +63,7 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ant dnsutils
+          sudo apt-get install -y ant dnsutils libx11-dev
 
       - name: Redirect legacy Maven URL
         if: steps.existing.outputs.exists == 'false' && inputs.version <= '3.2.1'
@@ -185,5 +185,5 @@ jobs:
             Upstream ref: ${{ inputs.upstream_ref }}
 
             Built automatically using GitHub Actions.
-          files: lwjgl/bin/android/lwjgl.aar
+          files: bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so
           fail_on_unmatched_files: true

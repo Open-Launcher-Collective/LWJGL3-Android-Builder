@@ -63,13 +63,24 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ant
+          sudo apt-get install -y ant dnsutils libx11-dev
 
-      - name: Install Android SDK and NDK
+      - name: Redirect legacy Maven URL
+        if: steps.existing.outputs.exists == 'false' && inputs.version <= '3.2.1'
+        run: |
+          REPO_IP=$(dig +short repo1.maven.org | tail -n1)
+          
+          if [ -z "$REPO_IP" ]; then
+            REPO_IP="104.18.19.12"
+          fi
+          
+          echo "$REPO_IP central.maven.org" | sudo tee -a /etc/hosts
+
+      - name: Install Android SDK
         if: steps.existing.outputs.exists == 'false'
         uses: android-actions/setup-android@v4
 
-      - name: Install NDK
+      - name: Install Android NDK
         if: steps.existing.outputs.exists == 'false'
         run: |
           sdkmanager "ndk;27.2.12479018"
@@ -97,11 +108,13 @@ jobs:
           cp config-source/.github/android/arm64/libffi.a \
             lwjgl/config/android/arm64/libffi.a
 
-      - name: Install liburing patch
+      - name: Install patches
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.1'
         run: |
           cp config-source/.github/android/compat.h \
             lwjgl/modules/lwjgl/core/src/main/c/linux/liburing/include/liburing/compat.h
+          cp config-source/.github/android/LinuxConfig.h \
+            lwjgl/modules/lwjgl/core/src/main/c/linux/LinuxConfig.h
 
       - name: Verify Android NDK
         run: |
@@ -123,16 +136,19 @@ jobs:
         working-directory: lwjgl
         env:
           LWJGL_BUILD_ARCH: arm64
+          LWJGL_BUILD_TRIPLET: aarch64-linux-android26
         run: |
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp -r /usr/include/X11 $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
           ant -Dplatform=android -Dbinding.remotery=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               init
-          LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false \
+          LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Dbinding.msdfgen=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
+          zip -j -r bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so bin/libs/native/android/arm64/org/lwjgl/liblwjgl.so
 
       - name: Set up Java 25
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.4.1'
@@ -146,18 +162,21 @@ jobs:
         working-directory: lwjgl
         env:
           LWJGL_BUILD_ARCH: arm64
+          LWJGL_BUILD_TRIPLET: aarch64-linux-android26
         run: |
           echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/arm64/org/lwjgl
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp -r /usr/include/X11 $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
           ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               init
-          LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
+          LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
+          zip -j -r bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so bin/libs/native/android/arm64/org/lwjgl/liblwjgl.so
 
       - name: Create GitHub Release
         if: steps.existing.outputs.exists == 'false'
@@ -173,5 +192,5 @@ jobs:
             Upstream ref: ${{ inputs.upstream_ref }}
 
             Built automatically using GitHub Actions.
-          files: lwjgl/bin/android/lwjgl.aar
+          files: lwjgl/bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip
           fail_on_unmatched_files: true

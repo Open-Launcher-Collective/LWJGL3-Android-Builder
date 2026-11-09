@@ -7,6 +7,14 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
+#include <linux/types.h>
+
+#if defined(__has_include)
+#  if __has_include(<linux/openat2.h>)
+#    include <linux/openat2.h>
+#  endif
+#endif
+
 typedef int __kernel_rwf_t;
 
 #ifndef __ANDROID__
@@ -16,10 +24,16 @@ struct __kernel_timespec {
 };
 #endif
 
+#ifndef RESOLVE_NO_XDEV
 struct open_how {
 	uint64_t	flags;
 	uint64_t	mode;
 	uint64_t	resolve;
 };
+#endif
+
+#ifdef __ANDROID__
+#define BLOCK_URING_CMD_DISCARD _IO(0x12, 0)
+#endif
 
 #endif

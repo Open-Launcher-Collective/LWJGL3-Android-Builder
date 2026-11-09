@@ -63,7 +63,18 @@ jobs:
         if: steps.existing.outputs.exists == 'false'
         run: |
           sudo apt-get update
-          sudo apt-get install -y ant
+          sudo apt-get install -y ant dig
+
+      - name: Redirect legacy Maven URL
+        if: steps.existing.outputs.exists == 'false' && inputs.version <= '3.2.1'
+        run: |
+          REPO_IP=$(dig +short repo1.maven.org | tail -n1)
+          
+          if [ -z "$REPO_IP" ]; then
+            REPO_IP="104.18.19.12"
+          fi
+          
+          echo "$REPO_IP central.maven.org" | sudo tee -a /etc/hosts
 
       - name: Install Android SDK and NDK
         if: steps.existing.outputs.exists == 'false'

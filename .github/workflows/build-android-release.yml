@@ -59,13 +59,6 @@ jobs:
           distribution: temurin
           java-version: "8"
 
-      - name: Set up Java 21
-        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.4.1'
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
       - name: Set up Java 25
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.4.1'
         uses: actions/setup-java@v4
@@ -110,6 +103,9 @@ jobs:
           
           cp config-source/.github/android/arm64/libffi.a \
             lwjgl/config/android/arm64/libffi.a
+          
+          cp config-source/.github/android/compat.h \
+            lwjgl/modules/lwjgl/core/src/main/c/linux/liburing/include/liburing/compat.h
 
       - name: Verify Android NDK
         run: |

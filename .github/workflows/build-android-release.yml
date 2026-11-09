@@ -105,7 +105,7 @@ jobs:
             lwjgl/config/android/arm64/libffi.a
 
       - name: Install liburing patch
-        if: steps.existing.outputs.exists == 'false' && inputs.version > '3.3.1'
+        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.1'
         run: |
           cp config-source/.github/android/compat.h \
             lwjgl/modules/lwjgl/core/src/main/c/linux/liburing/include/liburing/compat.h
@@ -131,7 +131,6 @@ jobs:
         env:
           LWJGL_BUILD_ARCH: arm64
         run: |
-          echo "LWJGL_BUILD_ARCH=$LWJGL_BUILD_ARCH"
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/

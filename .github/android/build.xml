@@ -5,9 +5,9 @@
 <project name="native-android" basedir="../.." xmlns:if="ant:if" xmlns:unless="ant:unless">
     <import file="../build-definitions.xml"/>
 
-    <condition property="android.triplet" value="armv7a-linux-android26"><isset property="build.arch.arm32"/></condition>
-    <condition property="android.triplet" value="aarch64-linux-android26"><isset property="build.arch.arm64"/></condition>
-    <condition property="android.triplet" value="x86_64-linux-android26"><isset property="build.arch.x64|x86"/></condition>
+    <condition property="android.triplet" value="armv7a-linux-android26"><isset property="env.LWJGL_BUILD_TRIPLET"/></condition>
+    <condition property="android.triplet" value="aarch64-linux-android26"><isset property="env.LWJGL_BUILD_TRIPLET"/></condition>
+    <condition property="android.triplet" value="x86_64-linux-android26"><isset property="env.LWJGL_BUILD_TRIPLET"/></condition>
 
     <condition property="gcc.prefix" value="${android.triplet}-" else="">
         <isset property="env.LWJGL_BUILD_ARCH"/>
@@ -104,10 +104,10 @@
             </uptodate>
             <local name="lib-dependencies-uptodate"/>
             <condition property="lib-dependencies-uptodate" value="true">
-            <or>
-                <isset property="lib-uptodate"/>
-                <istrue value="${build.offline}"/>
-            </or>
+                <or>
+                    <isset property="lib-uptodate"/>
+                    <istrue value="${build.offline}"/>
+                </or>
             </condition>
 
             <local name="version.script"/>

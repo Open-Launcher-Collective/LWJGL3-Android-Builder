@@ -134,6 +134,7 @@ jobs:
         working-directory: lwjgl
         env:
           LWJGL_BUILD_ARCH: arm64
+          LWJGL_BUILD_TRIPLET: aarch64-linux-android26
         run: |
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/

@@ -66,7 +66,7 @@ jobs:
           sudo apt-get install -y ant dnsutils libx11-dev
 
       - name: Redirect legacy Maven URL
-        if: steps.existing.outputs.exists == 'false' && inputs.version <= '3.2.1'
+        if: steps.existing.outputs.exists == 'false' && inputs.version <= '3.2.0'
         run: |
           REPO_IP=$(dig +short repo1.maven.org | tail -n1)
           
@@ -150,8 +150,27 @@ jobs:
           distribution: temurin
           java-version: "8"
 
-      - name: Build Android native libraries
-        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.4.1'
+      - name: Build Android native libraries >= 3.3.0
+        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.4.1' && inputs.version >= '3.3.0'
+        working-directory: lwjgl
+        env:
+          LWJGL_BUILD_ARCH: arm64
+          LWJGL_BUILD_TRIPLET: aarch64-linux-android26
+        run: |
+          test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
+          mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp config/android/$LWJGL_BUILD_ARCH/*.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp -r /usr/include/X11 $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
+          ant -Dplatform=android -Dbinding.remotery=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
+              init
+          LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Dbinding.msdfgen=false \
+              -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
+              compile-templates compile-native
+          zip -j -r bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so bin/libs/native/android/arm64/org/lwjgl/liblwjgl.so
+
+      - name: Build Android native libraries < 3.3.0
+        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.3.0'
         working-directory: lwjgl
         env:
           LWJGL_BUILD_ARCH: arm64
@@ -198,7 +217,7 @@ jobs:
           zip -j -r bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so bin/libs/native/android/arm64/org/lwjgl/liblwjgl.so
 
       - name: Create GitHub Release
-        if: steps.existing.outputs.exists == 'false'
+        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.0'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-lwjgl-${{ inputs.version }}
@@ -212,4 +231,21 @@ jobs:
 
             Built automatically using GitHub Actions.
           files: lwjgl/bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip
+          fail_on_unmatched_files: true
+
+      - name: Create GitHub Release
+        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.3.0'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-lwjgl-${{ inputs.version }}
+          name: LWJGL ${{ inputs.version }} - Android ARM64
+          target_commitish: ${{ github.sha }}
+          body: |
+            Android ARM64 build of LWJGL ${{ inputs.version }}.
+
+            Upstream repository: https://github.com/LWJGL/lwjgl3
+            Upstream ref: ${{ inputs.upstream_ref }}
+
+            Built automatically using GitHub Actions.
+          files: lwjgl/bin/native/android/arm64/org/lwjgl/lwjgl.zip
           fail_on_unmatched_files: true

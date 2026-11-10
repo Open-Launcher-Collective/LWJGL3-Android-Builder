@@ -167,7 +167,6 @@ jobs:
           LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Dbinding.msdfgen=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
-          zip -j -r bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so bin/libs/native/android/arm64/org/lwjgl/liblwjgl.so
 
       - name: Build Android native libraries < 3.3.0
         if: steps.existing.outputs.exists == 'false' && inputs.version < '3.3.0'
@@ -219,7 +218,7 @@ jobs:
       - name: Zip LWJGL Libraries
         if: steps.existing.outputs.exists == 'false'
         run: |
-          find . -name "liblwjgl*.so" | zip lwjgl/lwjgl.zip -@
+          find . -name "liblwjgl*.so" | zip lwjgl/lwjgl-${{ inputs.version }}.zip -@
 
       - name: Create GitHub Release
         if: steps.existing.outputs.exists == 'false'
@@ -235,5 +234,5 @@ jobs:
             Upstream ref: ${{ inputs.upstream_ref }}
 
             Built automatically using GitHub Actions.
-          files: lwjgl/lwjgl.zip
+          files: lwjgl/lwjgl-${{ inputs.version }}.zip
           fail_on_unmatched_files: true

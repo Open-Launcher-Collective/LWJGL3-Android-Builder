@@ -94,7 +94,7 @@ jobs:
           ln -sfn "$ANDROID_SDK_ROOT/ndk/27.2.12479018" \
             "$ANDROID_SDK_ROOT/ndk-bundle"
 
-      - name: Install Android configuration
+      - name: Install Android configuration >= 3.3.0
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.0'
         run: |
           mkdir -p lwjgl/config/android/arm64
@@ -108,7 +108,7 @@ jobs:
           cp config-source/.github/android/3.3/arm64/libffi.a \
             lwjgl/config/android/arm64/libffi.a
 
-      - name: Install Android configuration
+      - name: Install Android configuration < 3.3.0
         if: steps.existing.outputs.exists == 'false' && inputs.version < '3.3.0'
         run: |
           mkdir -p lwjgl/config/android/arm64
@@ -119,8 +119,12 @@ jobs:
           cp config-source/.github/android/3.2/version.script \
             lwjgl/config/android/version.script
           
-          cp config-source/.github/android/3.2/arm64/libffi.a \
-            lwjgl/config/android/arm64/libffi.a
+          cp config-source/.github/android/3.2/arm64/libdynload_s.a \
+            lwjgl/config/android/arm64/libdynload_s.a
+          cp config-source/.github/android/3.2/arm64/libdyncall_s.a \
+            lwjgl/config/android/arm64/libdyncall_s.a
+          cp config-source/.github/android/3.2/arm64/libdynload_s.a \
+            lwjgl/config/android/arm64/libdynload_s.a
 
       - name: Install patches
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.1'
@@ -154,7 +158,7 @@ jobs:
         run: |
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
-          cp config/android/$LWJGL_BUILD_ARCH/libffi.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
+          cp config/android/$LWJGL_BUILD_ARCH/*.a bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
           cp -r /usr/include/X11 $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
           ant -Dplatform=android -Dbinding.remotery=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \

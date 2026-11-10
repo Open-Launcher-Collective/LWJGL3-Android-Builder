@@ -123,8 +123,8 @@ jobs:
             lwjgl/config/android/arm64/libdynload_s.a
           cp config-source/.github/android/3.2/arm64/libdyncall_s.a \
             lwjgl/config/android/arm64/libdyncall_s.a
-          cp config-source/.github/android/3.2/arm64/libdynload_s.a \
-            lwjgl/config/android/arm64/libdynload_s.a
+          cp config-source/.github/android/3.2/arm64/libdyncallback_s.a \
+            lwjgl/config/android/arm64/libdyncallback_s.a
 
       - name: Install patches
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.1'

@@ -188,5 +188,5 @@ jobs:
             Upstream ref: ${{ inputs.upstream_ref }}
 
             Built automatically using GitHub Actions.
-          files: bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so
+          files: lwjgl/bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so
           fail_on_unmatched_files: true

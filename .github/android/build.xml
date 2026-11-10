@@ -158,6 +158,29 @@
 
             <!-- CORE -->
             <build module="core" flags="-Wall -Wextra -pedantic">
+                <source>
+                    <arg value="-I${src.main.rel}/dyncall"/>
+                    <fileset dir=".">
+                        <include name="${src.main}/*.c"/>
+                        <include name="${src.generated}/*.c"/>
+                        <include name="${src.generated}/${platform}/*.c"/>
+                        <include name="${module.lwjgl}/jawt/src/generated/c/*.c" if:true="${binding.jawt}"/>
+                    </fileset>
+                </source>
+                <beforeLink>
+                    <mkdir dir="${lib}/${platform}/${build.arch}"/>
+                    <parallel threadsPerProcessor="2" failonany="true" unless:set="lib-uptodate">
+                        <update-dependency name="dyncall" artifact="${build.arch}/libdyncall_s.a"/>
+                        <update-dependency name="dyncallback" artifact="${build.arch}/libdyncallback_s.a"/>
+                        <update-dependency name="dynload" artifact="${build.arch}/libdynload_s.a"/>
+                    </parallel>
+                </beforeLink>
+                <link>
+                    <fileset dir="${lib}/${platform}/${build.arch}/">
+                        <include name="libdyn*.a"/>
+                    </fileset>
+                    <arg value="-ldl"/>
+                </link>
                 <beforeCompile>
                     <compile>
                         <arg value="-I${src.main.rel}/linux/liburing"/>

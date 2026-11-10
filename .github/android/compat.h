@@ -7,6 +7,14 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
+#include <linux/types.h>
+
+#if defined(__has_include)
+#  if __has_include(<linux/openat2.h>)
+#    include <linux/openat2.h>
+#  endif
+#endif
+
 #define pwritev2(fd, iov, iovcnt, offset, flags)                         \
     ({                                                                   \
         uint64_t _pw2_off = (uint64_t)(offset);                          \

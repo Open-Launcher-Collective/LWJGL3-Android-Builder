@@ -227,7 +227,7 @@ jobs:
       - name: Zip LWJGL Libraries
         if: steps.existing.outputs.exists == 'false'
         run: |
-          find . -name "liblwjgl*.so" | zip lwjgl/lwjgl-${{ inputs.version }}.zip -@
+          find . -name "liblwjgl*.so" | zip -j lwjgl/lwjgl-${{ inputs.version }}.zip -@
 
       - name: Create GitHub Release
         if: steps.existing.outputs.exists == 'false'

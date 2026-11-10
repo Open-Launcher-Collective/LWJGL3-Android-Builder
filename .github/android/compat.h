@@ -9,8 +9,6 @@
 
 typedef int __kernel_rwf_t;
 
-#define ASSERT_STRUCT_DEFINED(type) extern int xy_##type[sizeof(struct type) ? 1 : -1]
-
 #ifndef __ANDROID__
 struct __kernel_timespec {
 	int64_t		tv_sec;
@@ -18,7 +16,7 @@ struct __kernel_timespec {
 };
 #endif
 
-#if !ASSERT_STRUCT_DEFINED(open_how)
+#ifndef RESOLVE_NO_XDEV
 struct open_how {
 	uint64_t	flags;
 	uint64_t	mode;

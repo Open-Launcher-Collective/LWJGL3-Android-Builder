@@ -5,6 +5,7 @@
 
 #include <stddef.h>
 #include <inttypes.h>
+#include <sys/uio.h>
 
 #define DISABLE_WARNINGS() \
     _Pragma("GCC diagnostic push")
@@ -19,22 +20,23 @@
 #define JNIEXPORT_CRITICAL static
 #define CRITICAL(function) _JavaCritical_##function
 
-#ifdef __ANDROID__
-#define pwritev2(fd, iov, iovcnt, offset, flags)                         \
-    ({                                                                   \
-        uint64_t _pw2_off = (uint64_t)(offset);                          \
-        (ssize_t)syscall(SYS_pwritev2, (int)(fd), (iov), (int)(iovcnt),  \
-                         (unsigned long)_pw2_off,                        \
-                         (unsigned long)(_pw2_off >> 32),                \
-                         (int)(flags));                                  \
-    })
+#if defined(__ANDROID__) && __ANDROID_API__ < 33
 
-#define preadv2(fd, iov, iovcnt, offset, flags)                          \
-    ({                                                                   \
-        uint64_t _pr2_off = (uint64_t)(offset);                          \
-        (ssize_t)syscall(SYS_preadv2, (int)(fd), (iov), (int)(iovcnt),   \
-                         (unsigned long)_pr2_off,                        \
-                         (unsigned long)(_pr2_off >> 32),                \
-                         (int)(flags));                                  \
-    })
+static inline ssize_t lwjgl_pwritev2(int fd, const struct iovec *iov, int iovcnt,
+                                     off_t offset, int flags) {
+        uint64_t off = (uint64_t)(int64_t)offset;
+        return (ssize_t)syscall(SYS_pwritev2, fd, iov, iovcnt,
+                                (unsigned long)off, (unsigned long)(off >> 32), flags);
+    }
+
+static inline ssize_t lwjgl_preadv2(int fd, const struct iovec *iov, int iovcnt,
+                                    off_t offset, int flags) {
+        uint64_t off = (uint64_t)(int64_t)offset;
+        return (ssize_t)syscall(SYS_preadv2, fd, iov, iovcnt,
+                                (unsigned long)off, (unsigned long)(off >> 32), flags);
+    }
+
+#define pwritev2(fd, iov, iovcnt, offset, flags) lwjgl_pwritev2((fd), (iov), (iovcnt), (offset), (flags))
+#define preadv2(fd, iov, iovcnt, offset, flags)  lwjgl_preadv2((fd), (iov), (iovcnt), (offset), (flags))
+
 #endif

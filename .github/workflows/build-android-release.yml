@@ -145,7 +145,7 @@ jobs:
           ant -Dplatform=android -Dbinding.remotery=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               init
-          LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false -Dbinding.msdfgen=false \
+          LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Dbinding.msdfgen=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
 
@@ -172,7 +172,7 @@ jobs:
           ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               init
-          LWJGL_BUILD_OFFLINE=true ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
+          LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
 

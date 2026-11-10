@@ -178,7 +178,7 @@ jobs:
         run: |
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
-          mkdir -p bin/libs/android/$LWJGL_BUILD_ARCH/
+          mkdir -p bin/android/$LWJGL_BUILD_ARCH/
           cp config/android/$LWJGL_BUILD_ARCH/*.a bin/libs/native/android/$LWJGL_BUILD_ARCH/
           cp config/android/$LWJGL_BUILD_ARCH/*.a bin/libs/android/$LWJGL_BUILD_ARCH/
           cp -r /usr/include/X11 $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
@@ -188,7 +188,7 @@ jobs:
           LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Dbinding.msdfgen=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
-          zip -j -r bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so bin/libs/native/android/arm64/org/lwjgl/liblwjgl.so
+          zip -j -r lwjgl.zip bin/android/arm64/org/lwjgl/**/liblwjgl*.so bin/android/arm64/org/lwjgl/liblwjgl.so bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so bin/libs/native/android/arm64/org/lwjgl/liblwjgl.so
 
       - name: Set up Java 25
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.4.1'
@@ -249,5 +249,5 @@ jobs:
             Upstream ref: ${{ inputs.upstream_ref }}
 
             Built automatically using GitHub Actions.
-          files: lwjgl/bin/native/android/arm64/org/lwjgl/lwjgl.zip
+          files: lwjgl/lwjgl.zip
           fail_on_unmatched_files: true

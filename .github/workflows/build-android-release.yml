@@ -119,6 +119,9 @@ jobs:
           cp config-source/.github/android/3.2/version.script \
             lwjgl/config/android/version.script
           
+          cp config-source/.github/android/3.2/vk_mem_alloc.h \
+            lwjgl/config/android/vk_mem_alloc.h
+          
           cp config-source/.github/android/3.2/arm64/libdynload_s.a \
             lwjgl/config/android/arm64/libdynload_s.a
           cp config-source/.github/android/3.2/arm64/libdyncall_s.a \
@@ -149,6 +152,12 @@ jobs:
         with:
           distribution: temurin
           java-version: "8"
+
+      - name: Install vk_mem_alloc patch == 3.2.2
+        if: steps.existing.outputs.exists == 'false' && inputs.version == '3.2.2'
+        working-directory: lwjgl
+        run: |
+          cp config/android/vk_mem_alloc.h modules/lwjgl/vma/src/main/c/vk_mem_alloc.h
 
       - name: Build Android native libraries >= 3.3.0
         if: steps.existing.outputs.exists == 'false' && inputs.version < '3.4.1' && inputs.version >= '3.3.0'

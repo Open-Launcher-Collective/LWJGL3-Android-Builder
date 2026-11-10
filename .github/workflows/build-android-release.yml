@@ -178,9 +178,9 @@ jobs:
         run: |
           test -x "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++"
           mkdir -p bin/libs/native/android/$LWJGL_BUILD_ARCH/org/lwjgl/
-          mkdir -p bin/android/$LWJGL_BUILD_ARCH/
+          mkdir -p bin/libs/android/$LWJGL_BUILD_ARCH/
           cp config/android/$LWJGL_BUILD_ARCH/*.a bin/libs/native/android/$LWJGL_BUILD_ARCH/
-          cp config/android/$LWJGL_BUILD_ARCH/*.a bin/android/$LWJGL_BUILD_ARCH/
+          cp config/android/$LWJGL_BUILD_ARCH/*.a bin/libs/android/$LWJGL_BUILD_ARCH/
           cp -r /usr/include/X11 $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
           ant -Dplatform=android -Dbinding.remotery=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \

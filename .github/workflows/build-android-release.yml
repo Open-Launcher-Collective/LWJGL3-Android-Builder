@@ -130,11 +130,11 @@ jobs:
             lwjgl/config/android/arm64/libdyncallback_s.a
 
       - name: Install patches
-        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.1'
+        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.0'
         run: |
-          cp config-source/.github/3.2/android/compat.h \
+          cp config-source/.github/3.3/android/compat.h \
             lwjgl/modules/lwjgl/core/src/main/c/linux/liburing/include/liburing/compat.h
-          cp config-source/.github/3.2/android/LinuxConfig.h \
+          cp config-source/.github/3.3/android/LinuxConfig.h \
             lwjgl/modules/lwjgl/core/src/main/c/linux/LinuxConfig.h
 
       - name: Verify Android NDK

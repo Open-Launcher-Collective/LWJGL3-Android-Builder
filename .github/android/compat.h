@@ -7,6 +7,24 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
+#define pwritev2(fd, iov, iovcnt, offset, flags)                         \
+    ({                                                                   \
+        uint64_t _pw2_off = (uint64_t)(offset);                          \
+        (ssize_t)syscall(SYS_pwritev2, (int)(fd), (iov), (int)(iovcnt),  \
+                         (unsigned long)_pw2_off,                        \
+                         (unsigned long)(_pw2_off >> 32),                \
+                         (int)(flags));                                  \
+    })
+
+#define preadv2(fd, iov, iovcnt, offset, flags)                          \
+    ({                                                                   \
+        uint64_t _pr2_off = (uint64_t)(offset);                          \
+        (ssize_t)syscall(SYS_preadv2, (int)(fd), (iov), (int)(iovcnt),   \
+                         (unsigned long)_pr2_off,                        \
+                         (unsigned long)(_pr2_off >> 32),                \
+                         (int)(flags));                                  \
+    })
+
 typedef int __kernel_rwf_t;
 
 #ifndef __ANDROID__

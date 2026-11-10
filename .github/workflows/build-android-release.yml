@@ -148,6 +148,7 @@ jobs:
           LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Dbinding.msdfgen=false \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
+          zip -r liblwjgl/bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip liblwjgl/bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so
 
       - name: Set up Java 25
         if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.4.1'
@@ -175,6 +176,7 @@ jobs:
           LWJGL_BUILD_OFFLINE=true ANT_OPTS="-Xmx4g -XX:MaxMetaspaceSize=512m" ant -Dplatform=android -Dbinding.remotery=false -Djdk25=true \
               -Dbinding.nfd=false -Dbinding.zstd=false -Dbinding.tinyexr=false -Dbinding.jawt=false \
               compile-templates compile-native
+          zip -r liblwjgl/bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip liblwjgl/bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so
 
       - name: Create GitHub Release
         if: steps.existing.outputs.exists == 'false'
@@ -190,5 +192,5 @@ jobs:
             Upstream ref: ${{ inputs.upstream_ref }}
 
             Built automatically using GitHub Actions.
-          files: lwjgl/bin/libs/native/android/arm64/org/lwjgl/**/liblwjgl*.so
+          files: lwjgl/bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip
           fail_on_unmatched_files: true

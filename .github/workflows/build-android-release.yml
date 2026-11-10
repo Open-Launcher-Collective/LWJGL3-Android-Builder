@@ -217,6 +217,7 @@ jobs:
               compile-templates compile-native
 
       - name: Zip LWJGL Libraries
+        if: steps.existing.outputs.exists == 'false'
         run: |
           find . -name "liblwjgl*.so" | zip lwjgl/lwjgl.zip -@
 

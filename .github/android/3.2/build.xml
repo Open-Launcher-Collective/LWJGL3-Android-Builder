@@ -167,6 +167,9 @@
                         <include name="${module.lwjgl}/jawt/src/generated/c/*.c" if:true="${binding.jawt}"/>
                     </fileset>
                 </source>
+                <beforeLink>
+                    <mkdir dir="${lib}/${platform}/${build.arch}"/>
+                </beforeLink>
                 <link>
                     <fileset dir="${lib}/${platform}/${build.arch}/">
                         <include name="libdyn*.a"/>

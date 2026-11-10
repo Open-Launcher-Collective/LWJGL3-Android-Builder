@@ -5,7 +5,11 @@
 
 #include <stddef.h>
 #include <inttypes.h>
+#include <stdint.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
 #include <sys/uio.h>
+#include <unistd.h>
 
 #define DISABLE_WARNINGS() \
     _Pragma("GCC diagnostic push")

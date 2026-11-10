@@ -221,23 +221,6 @@ jobs:
           find . -name "liblwjgl*.so" | zip lwjgl.zip -@
 
       - name: Create GitHub Release
-        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.0'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: android-lwjgl-${{ inputs.version }}
-          name: LWJGL ${{ inputs.version }} - Android ARM64
-          target_commitish: ${{ github.sha }}
-          body: |
-            Android ARM64 build of LWJGL ${{ inputs.version }}.
-
-            Upstream repository: https://github.com/LWJGL/lwjgl3
-            Upstream ref: ${{ inputs.upstream_ref }}
-
-            Built automatically using GitHub Actions.
-          files: lwjgl/bin/libs/native/android/arm64/org/lwjgl/lwjgl.zip
-          fail_on_unmatched_files: true
-
-      - name: Create GitHub Release
         if: steps.existing.outputs.exists == 'false' && inputs.version < '3.3.0'
         uses: softprops/action-gh-release@v2
         with:

@@ -181,43 +181,6 @@
                     </fileset>
                     <arg value="-ldl"/>
                 </link>
-                <beforeCompile>
-                    <compile>
-                        <arg value="-I${src.main.rel}/linux/liburing"/>
-                        <arg value="-I${src.main.rel}/linux/liburing/include"/>
-                        <arg value="-DCONFIG_HAVE_MEMFD_CREATE"/>
-                        <fileset dir="." includes="${src.main}/linux/liburing/*.c"/>
-                    </compile>
-                </beforeCompile>
-                <source>
-                    <arg value="-I${src.main.rel}/libffi"/>
-                    <arg value="-I${src.main.rel}/libffi/aarch64" if:set="build.arch.arm64"/>
-                    <arg value="-I${src.main.rel}/libffi/arm" if:set="build.arch.arm32"/>
-                    <arg value="-I${src.main.rel}/libffi/ppc64le" if:set="build.arch.ppc64le"/>
-                    <arg value="-I${src.main.rel}/libffi/riscv64" if:set="build.arch.riscv64"/>
-                    <arg value="-I${src.main.rel}/libffi/x86" if:set="build.arch.x64|x86"/>
-                    <arg value="-DX86_64" if:set="build.arch.x64"/> <!-- for libffi/x86/ffitarget.h -->
-                    <arg value="-DPOWERPC" if:set="build.arch.ppc64le"/> <!-- for libffi/ppc64le/ffitarget.h -->
-                    <arg value="-I${src.main.rel}/linux/liburing"/>
-                    <arg value="-I${src.main.rel}/linux/liburing/include"/>
-                    <fileset dir=".">
-                        <include name="${src.main}/*.c"/>
-                        <include name="${src.generated}/*.c"/>
-                        <include name="${src.generated}/linux/*.c"/>
-                        <include name="${module.lwjgl}/jawt/src/generated/c/*.c" if:true="${binding.jawt}"/>
-                    </fileset>
-                </source>
-                <beforeLink>
-                    <parallel threadsPerProcessor="2" failonany="true" unless:set="lib-dependencies-uptodate">
-                        <update-dependency module="core" artifact="core/libffi.a"/>
-                    </parallel>
-                </beforeLink>
-                <link>
-                    <fileset dir="${lib.native}/org/lwjgl">
-                        <include name="libffi.a"/>
-                    </fileset>
-                    <arg value="-ldl"/>
-                </link>
             </build>
 
             <!-- LLVM -->

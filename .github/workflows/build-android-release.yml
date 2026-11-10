@@ -95,17 +95,31 @@ jobs:
             "$ANDROID_SDK_ROOT/ndk-bundle"
 
       - name: Install Android configuration
-        if: steps.existing.outputs.exists == 'false'
+        if: steps.existing.outputs.exists == 'false' && inputs.version >= '3.3.0'
         run: |
           mkdir -p lwjgl/config/android/arm64
 
-          cp config-source/.github/android/build.xml \
+          cp config-source/.github/android/3.3/build.xml \
             lwjgl/config/android/build.xml
 
-          cp config-source/.github/android/version.script \
+          cp config-source/.github/android/3.3/version.script \
             lwjgl/config/android/version.script
           
-          cp config-source/.github/android/arm64/libffi.a \
+          cp config-source/.github/android/3.3/arm64/libffi.a \
+            lwjgl/config/android/arm64/libffi.a
+
+      - name: Install Android configuration
+        if: steps.existing.outputs.exists == 'false' && inputs.version < '3.3.0'
+        run: |
+          mkdir -p lwjgl/config/android/arm64
+
+          cp config-source/.github/android/3.2/build.xml \
+            lwjgl/config/android/build.xml
+
+          cp config-source/.github/android/3.2/version.script \
+            lwjgl/config/android/version.script
+          
+          cp config-source/.github/android/3.2/arm64/libffi.a \
             lwjgl/config/android/arm64/libffi.a
 
       - name: Install patches
